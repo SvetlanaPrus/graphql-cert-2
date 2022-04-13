@@ -1,28 +1,21 @@
 const { ApolloServer } = require('apollo-server');
 const typeDefs = require('./schema');
 
-const mocks = {
-  Query: () => ({
-    tracksForHome: () => [...new Array(9)],
-  }),
-  Track: () => ({
-    id: () => 'track_01',
-    title: () => 'Astro Kitty, Space Explorer',
-    author: () => {
-      return {
-        name: 'Grumpy Cat',
-        photo: 'https://res.cloudinary.com/dety84pbu/image/upload/v1606816219/kitty-veyron-sm_mctf3c.jpg',
-      };
-    },
-    thumbnail: () => 'https://res.cloudinary.com/dety84pbu/image/upload/v1598465568/nebula_cat_djkt9r.jpg',
-    length: () => 1210,
-    modulesCount: () => 6,
-  }),
-};
+const resolvers = require('./resolvers');
+const TrackAPI = require('./datasources/track-api');
 
 const server = new ApolloServer({
   typeDefs,
-  mocks,
+  resolvers,
+  /*To connect our server with our TrackAPI, we'll add the dataSources key.
+  // This is what enables us to access the dataSources.trackAPI (and its methods)
+  // from the context parameter of our resolvers.
+  // Apollo Server takes care of all the plumbing for us, pretty neat!*/
+  dataSources: () => {
+    return {
+      trackAPI: new TrackAPI()
+    };
+  }
 });
 
 server.listen().then(() => {
